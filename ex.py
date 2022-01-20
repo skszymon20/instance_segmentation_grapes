@@ -132,56 +132,58 @@ class WGISDMaskedDataset(Dataset):
     def __len__(self):
         return len(self.imgs)
 
-logging.basicConfig(
-    format='%(levelname)s: %(asctime)s %(message)s',
-    level = logging.DEBUG)
-NUM_CLASSES = 2
-LEARNING_RATE = 0.001
-WEIGHT_DECAY = 0.0005
-MOMENTUM = 0.9
-NUM_EPOCHS = 8
-BATCH_SIZE = 1
+if __name__ == '__main__':
+    logging.basicConfig(
+        format='%(levelname)s: %(asctime)s %(message)s',
+        level = logging.DEBUG)
+    NUM_CLASSES = 2
+    LEARNING_RATE = 0.001
+    WEIGHT_DECAY = 0.0005
+    MOMENTUM = 0.9
+    NUM_EPOCHS = 8
+    BATCH_SIZE = 1
 
-dataset = WGISDMaskedDataset('./wgisd')
-dataloader = DataLoader(dataset, BATCH_SIZE, shuffle=True, collate_fn=lambda s: tuple(zip(*s)))
-model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
-in_features = model.roi_heads.box_predictor.cls_score.in_features
-#replace head predictor (boxes)
-model.roi_heads.box_predictor = FastRCNNPredictor(in_features, NUM_CLASSES)
-in_features_mask = model.roi_heads.mask_predictor.conv5_mask.in_channels
-hidden_layer = 256
-#replace mask predictor
-model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, NUM_CLASSES)
-DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-model.to(DEVICE)
-for param in model.parameters():
-    param.requires_grad = True
-model.train()
-params = [p for p in model.parameters() if p.requires_grad]
-optimizer = torch.optim.SGD(params, lr=LEARNING_RATE, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
-lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
-n_batches = len(dataloader)
-for epoch in range(1, NUM_EPOCHS + 1):
-    logging.info(f'Current epoch: {epoch} of {NUM_EPOCHS}')
-    lossacc= 0.0
-    lossmaskacc = 0.0
-    for batchid, (images, targets) in enumerate(dataloader, 1):
-        images = [image.to(DEVICE) for image in images]
-        targets = [ {k : v.to(DEVICE) for k, v in t.items()}for t in targets]
+    dataset = WGISDMaskedDataset('./wgisd')
+    dataloader = DataLoader(dataset, BATCH_SIZE, shuffle=True, collate_fn=lambda s: tuple(zip(*s)))
+    model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    #replace head predictor (boxes)
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, NUM_CLASSES)
+    in_features_mask = model.roi_heads.mask_predictor.conv5_mask.in_channels
+    hidden_layer = 256
+    #replace mask predictor
+    model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, NUM_CLASSES)
+    DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    print('DEVICE:', DEVICE)
+    model.to(DEVICE)
+    for param in model.parameters():
+        param.requires_grad = True
+    model.train()
+    params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.SGD(params, lr=LEARNING_RATE, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY)
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
+    n_batches = len(dataloader)
+    for epoch in range(1, NUM_EPOCHS + 1):
+        logging.info(f'Current epoch: {epoch} of {NUM_EPOCHS}')
+        lossacc= 0.0
+        lossmaskacc = 0.0
+        for batchid, (images, targets) in enumerate(dataloader, 1):
+            images = [image.to(DEVICE) for image in images]
+            targets = [ {k : v.to(DEVICE) for k, v in t.items()}for t in targets]
 
-        loss_dict = model(images, targets)
-        loss = sum(loss for loss in loss_dict.values())
-        #backprop
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            loss_dict = model(images, targets)
+            loss = sum(loss for loss in loss_dict.values())
+            #backprop
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-        # #logs
-        lossmask=loss_dict['loss_mask'].item()
-        lossmaskacc += lossmask
-        lossacc += loss.item()
-        if (batchid % 25 ==0):
-            logging.info(f'lossmask:{lossmask}; loss:{loss.item()}; lossmaskacc:{lossmaskacc}; lossacc: {lossacc};')
-    logging.info(f'finalepoch{epoch}: lossmask:{lossmask}; loss:{loss.item()}; lossmaskacc:{lossmaskacc}; lossacc: {lossacc};')
-torch.save(model.state_dict(), './models/model0.pt')
-logging.info('finished')
+            # #logs
+            lossmask=loss_dict['loss_mask'].item()
+            lossmaskacc += lossmask
+            lossacc += loss.item()
+            if (batchid % 25 ==0):
+                logging.info(f'lossmask:{lossmask}; loss:{loss.item()}; lossmaskacc:{lossmaskacc}; lossacc: {lossacc};')
+        logging.info(f'finalepoch{epoch}: lossmask:{lossmask}; loss:{loss.item()}; lossmaskacc:{lossmaskacc}; lossacc: {lossacc};')
+    torch.save(model.state_dict(), './models/modeltest.pt')
+    logging.info('finished')
