@@ -3,6 +3,15 @@ import torchvision
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 import torch
+
+from ex import WGISDMaskedDataset
+from torch.utils.data import Dataset
+from PIL import Image
+import os
+import numpy as np
+from utilities import plot_item
+from torch.utils.data import DataLoader
+
 NUM_CLASSES = 2
 model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
 in_features = model.roi_heads.box_predictor.cls_score.in_features
@@ -14,13 +23,6 @@ hidden_layer = 256
 model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, NUM_CLASSES)
 model.load_state_dict(torch.load("./models/model1.pt", map_location=torch.device('cpu')))
 
-from ex import WGISDMaskedDataset
-from torch.utils.data import Dataset
-from PIL import Image
-import os
-import numpy as np
-from utilities import plot_item
-from torch.utils.data import DataLoader
 BATCH_SIZE = 2
 dataset=WGISDMaskedDataset('./wgisd/', source='train')
 dataloader = DataLoader(dataset, BATCH_SIZE, collate_fn=lambda s: tuple(zip(*s)))
