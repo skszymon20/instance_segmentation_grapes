@@ -1,13 +1,12 @@
 # instance_segmentation_grapes
 Instance segmentation on wgisd dataset for Computer Vision course on PP.
 We thank to https://github.com/thsant/wgisd for sumplementing us with the dataset.
-Project Idea comes from the paper: https://arxiv.org/pdf/1907.11819.pdf
+Inspirations for the project came from the paper: https://arxiv.org/pdf/1907.11819.pdf
 
 ## Our setup:
-First clone wgisd git repository: $git clone https://github.com/thsant/wgisd.git
-We used python 3.9.0 for running experiments.
-Install libraries which are listed in "requirements.txt"
-For example You can use $pip install -r requirements.txt
+ - First clone wgisd git repository: $git clone https://github.com/thsant/wgisd.git. It should be in current working directory.
+ - Install libraries which are listed in "requirements.txt". For example You can use $pip install -r requirements.txt
+ - We used python 3.9.0 for running experiments.
 
 ## Get started
 Project consists of 4 notebooks: evaluate.ipynb, evaluate_losses.ipynb, evaluate_losses_imaug (1).ipynb, plot_samples.ipynb. Notebooks listed here are sorted from the oldest to the latest. 
@@ -21,4 +20,4 @@ Project consists of 4 notebooks: evaluate.ipynb, evaluate_losses.ipynb, evaluate
  - Magdalena Kobusińska
 
 ## Contact:
- - mail: skszymon20@gmail.com
+ - email: skszymon20@gmail.com
