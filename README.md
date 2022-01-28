@@ -2,6 +2,9 @@
 Instance segmentation on wgisd dataset for Computer Vision course on PP.
 Inspirations for the project came from the paper: https://arxiv.org/pdf/1907.11819.pdf
 
+## Tags
+To view repository status from the moment of the Report.pdf please view tag v0.0.1
+
 ## Our setup:
  - First clone wgisd git repository: $git clone https://github.com/thsant/wgisd.git. It should be in current working directory.
  - Install libraries which are listed in "requirements.txt". For example You can use $pip install -r requirements.txt
